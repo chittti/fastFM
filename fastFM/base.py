@@ -1,5 +1,6 @@
 # Author: Immanuel Bayer
 # License: BSD 3 clause
+import json
 
 import numpy as np
 import scipy.sparse as sp
@@ -100,6 +101,9 @@ class FactorizationMachine(BaseEstimator):
         assert sp.isspmatrix_csc(X_test)
         assert X_test.shape[1] == len(self.w_)
         return ffm.ffm_predict(self.w0_, self.w_, self.V_, X_test)
+
+    def toJSON(self):
+        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4, ensure_ascii=False).encode()
 
 
 class BaseFMClassifier(FactorizationMachine, ClassifierMixin):

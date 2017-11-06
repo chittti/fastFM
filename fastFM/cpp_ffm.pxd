@@ -8,6 +8,7 @@ cdef extern from "../fastFM-core2/fastFM/fastfm.h" namespace "fastfm":
 
     cdef cppclass Settings:
         Settings()
+        Settings(string settings)
 
     cdef cppclass Model:
         Model()

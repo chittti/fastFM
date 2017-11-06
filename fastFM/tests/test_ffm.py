@@ -22,6 +22,18 @@ def get_test_problem():
     w0 = 2
     return w0, w, V, y, X
 
+def get_test_problem_with_zero_params():
+    X = sp.csc_matrix(np.array([[6, 1],
+                                [2, 3],
+                                [3, 0],
+                                [6, 1],
+                                [4, 5]]), dtype=np.float64)
+    y = np.array([298, 266, 29, 298, 848], dtype=np.float64)
+    V = np.array([[6, 0],
+                  [5, 8]], dtype=np.float64)
+    w = np.array([9, 2], dtype=np.float64)
+    w0 = 2
+    return w0, w, V, y, X
 
 def test_ffm_predict():
     w0, w, V, y, X = get_test_problem()
@@ -49,8 +61,10 @@ def test_ffm_fit():
     assert_equal(np.round(y_pred), y)
 
 def test_ffm2_fit():
-    *_, y, X = get_test_problem()
+    w0, w, V, y, X = get_test_problem_with_zero_params()
     fm = als.FMRegression(n_iter=1000, init_stdev=0.1, rank=2, l2_reg_w=0.1, l2_reg_V=0.5)
-    w0, w, V = ffm2.ffm_als_fit(fm, X, y)
-    y_pred = ffm2.ffm_predict(w0, w, V, X)
+    # jsn = json.dumps({'n_iter': 1000, 'rank': 2})
+    w0, w, V = ffm2.ffm_als_fit(w0, w, V, X, y, fm.rank, fm.toJSON())
+    print(w0, w , V)
+    # y_pred = ffm2.ffm_predict(w0, w, V, X)
     # assert_equal(np.round(y_pred), y)

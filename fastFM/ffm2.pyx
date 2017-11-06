@@ -4,9 +4,11 @@
 cimport cpp_ffm
 from cpp_ffm cimport Settings, Data, Model, predict, fit
 from libcpp.memory cimport nullptr
+from libcpp.string cimport string
 
 cimport numpy as np
 import numpy as np
+
 
 def ffm_predict(double w_0, double[:] w,
                 np.ndarray[np.float64_t, ndim = 2] V, X):
@@ -49,7 +51,8 @@ def ffm_predict(double w_0, double[:] w,
 
     return y
 
-def ffm_als_fit(fm, X, double[:] y):
+def ffm_als_fit(double w_0, double[:] w, np.ndarray[np.float64_t, ndim = 2] V,
+                X, double[:] y, int rank, settings):
     assert X.shape[0] == len(y) # test shapes
 
     n_features = X.shape[1]
@@ -68,26 +71,11 @@ def ffm_als_fit(fm, X, double[:] y):
 
     cdef Model* m = new Model()
 
-    cdef double w_0
-    cdef np.ndarray[np.float64_t, ndim=1, mode='c'] w
-    cdef np.ndarray[np.float64_t, ndim=2, mode='c'] V
-
-    if fm.warm_start:
-        w_0 = 0 if fm.ignore_w_0 else fm.w0_
-        w = np.zeros(n_features, dtype=np.float64) if fm.ignore_w else fm.w_
-        V = np.zeros((fm.rank, n_features), dtype=np.float64)\
-                if fm.rank == 0 else fm.V_
-    else:
-        w_0 = 0
-        w = np.zeros(n_features, dtype=np.float64)
-        V = np.zeros((fm.rank, n_features), dtype=np.float64)
-
     m.add_parameter(&w_0)
     m.add_parameter(&w[0], n_features)
-    m.add_parameter(<double *> V.data, fm.rank, n_features, 2)
+    m.add_parameter(<double *> V.data, rank, n_features, 2)
 
-
-    cdef Settings* s = new Settings()
+    cdef Settings* s = new Settings(settings)
 
     cpp_ffm.fit(s, m, d)
 
